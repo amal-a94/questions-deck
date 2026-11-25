@@ -133,8 +133,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 <script>
 (function () {
   const SHORT = ["Icebreakers", "Light & fun", "Would you rather", "Getting to know", "Deep talks", "Warm & comforting",
-    "Best friends", "Couples", "Family", "Disagreements", "For yourself", "Quiz: know me?"];
-  const HUES = [200, 38, 280, 160, 228, 18, 330, 350, 110, 0, 250, 52];
+    "Best friends", "Couples", "Family", "Disagreements", "For yourself", "Quiz: know me?", "The 36 Questions"];
+  const HUES = [200, 38, 280, 160, 228, 18, 330, 350, 110, 0, 250, 52, 85];
+  const ARON = 12; let rank = {};
   const AR = /[؀-ۿ]/;
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -156,7 +157,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
     return all.filter(c =>
       (filter === "all" || (filter === "ar" ? AR.test(c.q) : c.c === filter)) && !(skipGaps && isGap(c)));
   }
-  function rebuild() { deck = shuffle(pool()); pos = 0; render(); }
+  function rebuild() { deck = filter === ARON ? pool().sort((a, b) => a.n - b.n) : shuffle(pool()); pos = 0; render(); }
 
   function esc(s) { return s.replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch])); }
   function questionHTML(text) {
@@ -184,7 +185,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
     const paint = () => {
       card.style.setProperty("--h", HUES[c.c]);
       $("cat").textContent = SHORT[c.c];
-      $("no").textContent = "No. " + c.n;
+      $("no").textContent = c.c === ARON ? `${rank[c.n]} of 36` : "No. " + c.n;
       const q = $("q");
       if (AR.test(c.q)) q.setAttribute("dir", "rtl"); else q.removeAttribute("dir");
       q.innerHTML = questionHTML(c.q);
@@ -241,6 +242,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 
   fetch("questions.json").then(r => r.json()).then(data => {
     cats = data.cats; all = data.cards;
+    all.filter(c => c.c === ARON).sort((a, b) => a.n - b.n).forEach((c, i) => { rank[c.n] = i + 1; });
     if (filter !== "all" && filter !== "ar" && !(filter >= 0 && filter < SHORT.length)) filter = "all";
     buildChips(); rebuild();
   }).catch(() => {
