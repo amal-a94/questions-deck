@@ -1,5 +1,5 @@
 // Saves the deck on the phone so it opens with no connection.
-const CACHE = "questions-v2";
+const CACHE = "questions-v3";
 const FILES = ["./", "index.html", "questions.json", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
